@@ -218,7 +218,7 @@ def process_games(games, headers):
                             if ('defense',name) in total_stats:
                                 stat_per_play = defense_stats[name] / defense_plays
                                 stat_dict[(location,'defense',name,'perPlay')] = stat_per_play
-                                defenseStats[name] /= num_games
+                                defense_stats[name] /= num_games
                             stat_dict[(location,'defense',name)] = defense_stats[name]
                     offense_stats = team_advanced_stats[0]['offense']
                     offense_plays = offense_stats['plays']

@@ -73,7 +73,8 @@ def gather_game_data(configuration):
 
     max_year_in_games2 = max([games2[i]['year'] for i in range(len(games2))])
     
-    for year in (max_year_in_cache,max_year_in_games2+1):
+    for year in range(max_year_in_cache,max_year_in_games2+1):
+        print('Adding games to cache from ', year)
         cached_games[year] = {}
         max_week = max([games2[i]['week'] for i in range(len(games2)) if games2[i]['year']==year])
         for week in range(0,max_week_in_games2+1): # Possibly refilling old data, data gets updates for a few weeks after games
@@ -116,7 +117,7 @@ def process_games(games, headers):
         if (week,year) != curr_week_year and (year != 2014 or week != 2): # Site has an error for 2014 week 2
             season_stats = [] # This will be all stats from the season endpoint
             advanced_stats = [] # This will be all stats from the season/advanced endpoint
-            print(week,year)
+            print('Compiling games from week, year: ', week,year)
             curr_week_year = (week,year)
             if week > 1:
                 endpoint = "/stats/season"

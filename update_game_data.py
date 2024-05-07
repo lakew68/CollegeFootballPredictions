@@ -32,6 +32,7 @@ def gather_game_data(configuration):
     lines = []
     games = []
     for year in range(max_year_in_cache, current_year):
+        print('Gathering games from ', year)
         response = games_api.get_games(year=year)
         games = [*games, *response]
 
@@ -191,21 +192,16 @@ def process_games(games, headers):
                     team_advanced_stats = []
                     
                 # Below block normalizes team_stats statistics by games played
-                team_stats_copy = []
+                team_stats_copy = {}
                 for stat_idx, stat in enumerate(team_stats):
                     if stat['statName'] == 'games':
                         num_games = stat['statValue']
+                
                 for stat in team_stats:
                     if stat['statName'] == 'games':
-                        team_stats_copy[(location,stat['statName'])] = stat['statValue']
+                        stat_dict[(location,stat['statName'])] = stat['statValue']
                     else:
-                        team_stats_copy[(location,stat['statName'])] = stat['statValue'] / num_games
-                team_stats = team_stats_copy
-
-                for stat in team_stats:
-                    stat_dict[(location,stat['statName'])] = stat['statValue']
-
-                
+                        stat_dict[(location,stat['statName'])] = stat['statValue'] / num_games
                 
                 if len(team_advanced_stats) > 0:
                     defense_stats = team_advanced_stats[0]['defense']

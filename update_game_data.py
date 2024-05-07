@@ -78,7 +78,7 @@ def gather_game_data(configuration):
         print('Adding games to cache from ', year)
         cached_games[year] = {}
         max_week = max([games2[i]['week'] for i in range(len(games2)) if games2[i]['year']==year])
-        for week in range(0,max_week_in_games2+1): # Possibly refilling old data, data gets updates for a few weeks after games
+        for week in range(0,max_week+1): # Possibly refilling old data, data gets updates for a few weeks after games
             cached_games[year][week] = {}
             for game in games2:
                 if game['week'] == week and game['year'] == year:

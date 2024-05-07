@@ -108,6 +108,12 @@ def process_games(games, headers):
     count = 0
     curr_week_year = (0,0)
     base_url = 'https://api.collegefootballdata.com'
+    total_stats = [('defense', 'plays'),('defense', 'drives'),('defense', 'totalPPA'),('defense', 'lineYardsTotal'),('defense', 'secondLevelYardsTotal'),
+             ('defense', 'openFieldYardsTotal'),('defense', 'totalOpportunies'),('defense','passingDowns', 'totalPPA'),('defense','rushingPlays', 'totalPPA'),
+              ('defense', 'passingPlays', 'totalPPA'),('offense', 'plays'),('offense', 'drives'),('offense', 'totalPPA'),('offense', 'lineYardsTotal'),
+              ('offense', 'secondLevelYardsTotal'),('offense', 'openFieldYardsTotal'),('offense', 'totalOpportunies'),('offense','passingDowns', 'totalPPA'),
+              ('offense','rushingPlays', 'totalPPA'),('offense', 'passingPlays', 'totalPPA')] # For normalizing advanced stats
+                
     
     for game in games:
         year = game['year']
@@ -183,24 +189,56 @@ def process_games(games, headers):
                     team_advanced_stats = [advanced_stats[idx_team2[0]]]
                 else:
                     team_advanced_stats = []
+                    
+                # Below block normalizes team_stats statistics by games played
+                team_stats_copy = {}
+                for stat_idx, stat in enumerate(team_stats):
+                    if stat['statName'] == 'games':
+                        num_games = stat['statValue']
+                for stat in team_stats:
+                    if stat['statName'] == 'games':
+                        team_stats_copy[(location,stat['statName'])] = stat['statValue']
+                    else:
+                        team_stats_copy[(location,stat['statName'])] = stat['statValue'] / num_games
+                team_stats = team_stats_copy
 
                 for stat in team_stats:
                     stat_dict[(location,stat['statName'])] = stat['statValue']
 
+                
+                
                 if len(team_advanced_stats) > 0:
                     defense_stats = team_advanced_stats[0]['defense']
+                    defense_plays = defense_stats['plays']
                     for name in defense_stats.keys():
                         if type(defense_stats[name]) == type({}):
                             for name2 in defense_stats[name].keys():
+                                if ('defense',name,name2) in total_stats:
+                                    stat_per_play = defense_stats[name][name2] / defense_plays
+                                    stat_dict[(location,'defense',name,name2,'perPlay')] = stat_per_play
+                                    defense_stats[name][name2] /= num_games
                                 stat_dict[(location,'defense',name,name2)] = defense_stats[name][name2]
                         else:
+                            if ('defense',name) in total_stats:
+                                stat_per_play = defense_stats[name] / defense_plays
+                                stat_dict[(location,'defense',name,'perPlay')] = stat_per_play
+                                defenseStats[name] /= num_games
                             stat_dict[(location,'defense',name)] = defense_stats[name]
                     offense_stats = team_advanced_stats[0]['offense']
+                    offense_plays = offense_stats['plays']
                     for name in offense_stats.keys():
                         if type(offense_stats[name]) == type({}):
                             for name2 in offense_stats[name].keys():
+                                if ('offense',name,name2) in total_stats:
+                                    stat_per_play = offense_stats[name][name2] / offense_plays
+                                    stat_dict[(location,'offense',name,name2,'perPlay')] = stat_per_play
+                                    offense_stats[name][name2] /= num_games
                                 stat_dict[(location,'offense',name,name2)] = offense_stats[name][name2]
                         else:
+                            if ('offense',name) in total_stats:
+                                stat_per_play = offense_stats[name] / offense_plays
+                                stat_dict[(location,'offense',name,'perPlay')] = stat_per_play
+                                offense_stats[name] /= num_games
                             stat_dict[(location,'offense',name)] = offense_stats[name]
         else:
             stat_dict = {}
@@ -212,15 +250,23 @@ def process_games(games, headers):
                     for name in defense_stats.keys():
                         if type(defense_stats[name]) == type({}):
                             for name2 in defense_stats[name].keys():
+                                if ('defense',name,name2) in total_stats:
+                                    stat_dict[(location,'defense',name,name2,'perPlay')] = 0
                                 stat_dict[(location,'defense',name,name2)] = 0
                         else:
+                            if ('defense',name) in total_stats:
+                                stat_dict[(location,'defense',name,'perPlay')] = 0
                             stat_dict[(location,'defense',name)] = 0
                     offense_stats = advanced_stats[0]['offense']
                     for name in offense_stats.keys():
                         if type(offense_stats[name]) == type({}):
                             for name2 in offense_stats[name].keys():
+                                if ('offense',name,name2) in total_stats:
+                                    stat_dict[(location,'offense',name,name2,'perPlay')] = 0
                                 stat_dict[(location,'offense',name,name2)] = 0
                         else:
+                            if ('offense',name) in total_stats:
+                                stat_dict[(location,'offense',name,'perPlay')] = 0
                             stat_dict[(location,'offense',name)] = 0
 
         for stat in stat_dict.keys():

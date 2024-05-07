@@ -191,7 +191,7 @@ def process_games(games, headers):
                     team_advanced_stats = []
                     
                 # Below block normalizes team_stats statistics by games played
-                team_stats_copy = {}
+                team_stats_copy = []
                 for stat_idx, stat in enumerate(team_stats):
                     if stat['statName'] == 'games':
                         num_games = stat['statValue']

@@ -133,11 +133,6 @@ def process_games(games, headers):
                 if response.status_code != 200:
                     print('AHHHH', response)
                 season_stats = response.json()
-                params = {
-                    "year": year,
-                    "endWeek" : week - 1
-
-                }
                 endpoint = "/stats/season/advanced"
                 response = requests.get(f"{base_url}{endpoint}", params=params, headers=headers)
                 advanced_stats = response.json()
@@ -153,12 +148,6 @@ def process_games(games, headers):
                         }
                 response = requests.get(f"{base_url}{endpoint}", params=params, headers=headers)
                 season_stats = response.json()
-                params = {
-                    "year": 2022,
-                    "endWeek" : 5,
-                    "team" : 'Texas'
-
-                }
                 endpoint = "/stats/season/advanced"
                 response = requests.get(f"{base_url}{endpoint}", params=params, headers=headers)
                 advanced_stats = response.json()

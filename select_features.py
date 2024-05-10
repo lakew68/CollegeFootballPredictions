@@ -47,7 +47,7 @@ def select_features(df_z_scaled, excluded=[],cat_features=[], threshold=0.8):
 
         df_feature_sel = df_feature_sel.iloc[:, [j for j, c in enumerate(df_feature_sel.columns) if j != i]]
 
-    train_df = df_feature_sel.query("2015 < year < 2023")
+    train_df = df_feature_sel.query("2015 < year < 2023 and week != 1")
     cont_features = [c for c in df_feature_sel.columns.to_list() if c not in cat_features and c not in excluded]
     splits = RandomSplitter(valid_pct=0.2)(range_of(train_df))
     to = TabularPandas(train_df, procs=[Categorify, Normalize],

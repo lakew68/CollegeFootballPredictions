@@ -117,9 +117,27 @@ def process_games(games, headers):
         away_team = game['away_team']
         
         old_week, old_year = curr_week_year
-        if old_year != year and year > 2013:
+        if old_year != year and year > 2013 and old_year > 0:
             old_season_stats = season_stats
             old_advanced_stats = advanced_stats
+        elif old_year == 0 and year > 2013:
+            old_season_stats = [] # This will be all stats from the season endpoint
+            old_advanced_stats = [] # This will be all stats from the season/advanced endpoint
+            if week > 1:
+                endpoint = "/stats/season"
+                params = {
+                            "year": year-1,
+                            "excludeGarbageTime" : True
+                        }
+                response = requests.get(f"{base_url}{endpoint}", params=params, headers=headers)
+
+                # Check if the request was successful (status code 200)
+                if response.status_code != 200:
+                    print('AHHHH', response)
+                old_season_stats = response.json()
+                endpoint = "/stats/season/advanced"
+                response = requests.get(f"{base_url}{endpoint}", params=params, headers=headers)
+                old_advanced_stats = response.json()
         
         if (week,year) != curr_week_year and (year != 2014 or week != 2): # Site has an error for 2014 week 2
             season_stats = [] # This will be all stats from the season endpoint
@@ -209,6 +227,7 @@ def process_games(games, headers):
                         stat_dict[(location,stat['statName'])] = stat['statValue']
                     else:
                         stat_dict[(location,stat['statName'])] = stat['statValue'] / num_games
+                        
                 if len(team_advanced_stats) > 0:
                     defense_stats = team_advanced_stats[0]['defense']
                     defense_plays = defense_stats['plays']
@@ -219,19 +238,19 @@ def process_games(games, headers):
                                     if defense_stats[name][name2] is not None: 
                                         stat_per_play = defense_stats[name][name2] / defense_plays
                                         stat_dict[(location,'defense',name,name2,'perPlay')] = stat_per_play
-                                        defense_stats[name][name2] /= num_games
+                                        stat_dict[(location,'defense',name,name2)] = defense_stats[name][name2] / num_games
                                     else:
                                         stat_dict[(location,'defense',name,name2,'perPlay')] = None
-                                stat_dict[(location,'defense',name,name2)] = defense_stats[name][name2]
+                                        stat_dict[(location,'defense',name,name2)] = None
                         else:
                             if ('defense',name) in total_stats:
                                 if defense_stats[name] is not None:
                                     stat_per_play = defense_stats[name] / defense_plays
                                     stat_dict[(location,'defense',name,'perPlay')] = stat_per_play
-                                    defense_stats[name] /= num_games
+                                    stat_dict[(location,'defense',name)] = defense_stats[name] / num_games
                                 else:
                                     stat_dict[(location,'defense',name,'perPlay')] = None
-                            stat_dict[(location,'defense',name)] = defense_stats[name]
+                                    stat_dict[(location,'defense',name)] = None
                     offense_stats = team_advanced_stats[0]['offense']
                     offense_plays = offense_stats['plays']
                     for name in offense_stats.keys():
@@ -241,19 +260,19 @@ def process_games(games, headers):
                                     if offense_stats[name][name2] is not None:
                                         stat_per_play = offense_stats[name][name2] / offense_plays
                                         stat_dict[(location,'offense',name,name2,'perPlay')] = stat_per_play
-                                        offense_stats[name][name2] /= num_games
+                                        stat_dict[(location,'offense',name,name2)] = offense_stats[name][name2] / num_games
                                     else:
                                         stat_dict[(location,'offense',name,name2,'perPlay')] = None
-                                stat_dict[(location,'offense',name,name2)] = offense_stats[name][name2]
+                                        stat_dict[(location,'offense',name,name2)] = None
                         else:
                             if ('offense',name) in total_stats:
                                 if offense_stats[name] is not None:
                                     stat_per_play = offense_stats[name] / offense_plays
                                     stat_dict[(location,'offense',name,'perPlay')] = stat_per_play
-                                    offense_stats[name] /= num_games
+                                    stat_dict[(location,'offense',name)] = offense_stats[name] / num_games
                                 else:
                                     stat_dict[(location,'offense',name,'perPlay')] = None
-                            stat_dict[(location,'offense',name)] = offense_stats[name]
+                                    stat_dict[(location,'offense',name)] = None
         else:
             stat_dict = {}
             for location in ['home','away']:
@@ -326,19 +345,20 @@ def process_games(games, headers):
                                     if defense_stats[name][name2] is not None: 
                                         stat_per_play = defense_stats[name][name2] / defense_plays
                                         stat_dict[(location,'defense',name,name2,'lastSeason','perPlay')] = stat_per_play
-                                        defense_stats[name][name2] /= num_games
+                                        stat_dict[(location,'defense',name,name2,'lastSeason')] = defense_stats[name][name2] / num_games
                                     else:
                                         stat_dict[(location,'defense',name,name2,'lastSeason','perPlay')] = None
-                                stat_dict[(location,'defense',name,name2,'lastSeason')] = defense_stats[name][name2]
+                                        stat_dict[(location,'defense',name,name2,'lastSeason')] = None
                         else:
                             if ('defense',name) in total_stats:
                                 if defense_stats[name] is not None:
                                     stat_per_play = defense_stats[name] / defense_plays
                                     stat_dict[(location,'defense',name,'lastSeason','perPlay')] = stat_per_play
-                                    defense_stats[name] /= num_games
+                                    stat_dict[(location,'defense',name,'lastSeason')] = defense_stats[name] / num_games
                                 else:
                                     stat_dict[(location,'defense',name,'lastSeason','perPlay')] = None
-                            stat_dict[(location,'defense','lastSeason',name)] = defense_stats[name]
+                                    stat_dict[(location,'defense',name,'lastSeason')] = None
+                            
                     offense_stats = team_advanced_stats[0]['offense']
                     offense_plays = offense_stats['plays']
                     for name in offense_stats.keys():
@@ -348,21 +368,20 @@ def process_games(games, headers):
                                     if offense_stats[name][name2] is not None:
                                         stat_per_play = offense_stats[name][name2] / offense_plays
                                         stat_dict[(location,'offense',name,name2,'lastSeason','perPlay')] = stat_per_play
-                                        offense_stats[name][name2] /= num_games
+                                        stat_dict[(location,'offense',name,name2,'lastSeason')] = offense_stats[name][name2] / num_games
                                     else:
                                         stat_dict[(location,'offense',name,name2,'lastSeason','perPlay')] = None
-                                stat_dict[(location,'offense',name,name2,'lastSeason')] = offense_stats[name][name2]
+                                        stat_dict[(location,'offense',name,name2,'lastSeason')] = None
                         else:
                             if ('offense',name) in total_stats:
                                 if offense_stats[name] is not None:
                                     stat_per_play = offense_stats[name] / offense_plays
                                     stat_dict[(location,'offense',name,'lastSeason','perPlay')] = stat_per_play
-                                    offense_stats[name] /= num_games
+                                    stat_dict[(location,'offense',name,'lastSeason')] = offense_stats[name] / num_games
                                 else:
                                     stat_dict[(location,'offense',name,'lastSeason','perPlay')] = None
-                            stat_dict[(location,'offense',name,'lastSeason')] = offense_stats[name]
+                                    stat_dict[(location,'offense',name,'lastSeason')] = None
         else:
-            stat_dict = {}
             for location in ['home','away']:
                 for stat in season_stats:
                     stat_dict[(location,stat['statName'],'lastSeason')] = 0
@@ -432,19 +451,19 @@ def process_games(games, headers):
                                     if defense_stats[name][name2] is not None: 
                                         stat_per_play = defense_stats[name][name2] / defense_plays
                                         stat_dict[(location,'defense',name,name2,'lastThree','perPlay')] = stat_per_play
-                                        defense_stats[name][name2] /= num_games
+                                        stat_dict[(location,'defense',name,name2,'lastThree')] = defense_stats[name][name2] / num_games
                                     else:
                                         stat_dict[(location,'defense',name,name2,'lastThree','perPlay')] = None
-                                stat_dict[(location,'defense',name,name2,'lastThree')] = defense_stats[name][name2]
+                                        stat_dict[(location,'defense',name,name2,'lastThree')] = None
                         else:
                             if ('defense',name) in total_stats:
                                 if defense_stats[name] is not None:
                                     stat_per_play = defense_stats[name] / defense_plays
                                     stat_dict[(location,'defense',name,'lastThree','perPlay')] = stat_per_play
-                                    defense_stats[name] /= num_games
+                                    stat_dict[(location,'defense',name,'lastThree')] = defense_stats[name] / num_games
                                 else:
                                     stat_dict[(location,'defense',name,'lastThree','perPlay')] = None
-                            stat_dict[(location,'defense','lastThree',name)] = defense_stats[name]
+                                    stat_dict[(location,'defense',name,'lastThree')] = None
                     offense_stats = team_advanced_stats[0]['offense']
                     offense_plays = offense_stats['plays']
                     for name in offense_stats.keys():
@@ -454,21 +473,21 @@ def process_games(games, headers):
                                     if offense_stats[name][name2] is not None:
                                         stat_per_play = offense_stats[name][name2] / offense_plays
                                         stat_dict[(location,'offense',name,name2,'lastThree','perPlay')] = stat_per_play
-                                        offense_stats[name][name2] /= num_games
+                                        stat_dict[(location,'offense',name,name2,'lastThree')] = offense_stats[name][name2] / num_games
                                     else:
                                         stat_dict[(location,'offense',name,name2,'lastThree','perPlay')] = None
-                                stat_dict[(location,'offense',name,name2,'lastThree')] = offense_stats[name][name2]
+                                        stat_dict[(location,'offense',name,name2,'lastThree')] = None
+                                
                         else:
                             if ('offense',name) in total_stats:
                                 if offense_stats[name] is not None:
                                     stat_per_play = offense_stats[name] / offense_plays
                                     stat_dict[(location,'offense',name,'lastThree','perPlay')] = stat_per_play
-                                    offense_stats[name] /= num_games
+                                    stat_dict[(location,'offense',name,'lastThree')] = offense_stats[name] / num_games
                                 else:
                                     stat_dict[(location,'offense',name,'lastThree','perPlay')] = None
-                            stat_dict[(location,'offense',name,'lastThree')] = offense_stats[name]
+                                    stat_dict[(location,'offense',name,'lastThree')] = None
         else:
-            stat_dict = {}
             for location in ['home','away']:
                 for stat in season_stats:
                     stat_dict[(location,stat['statName'],'lastThree')] = 0

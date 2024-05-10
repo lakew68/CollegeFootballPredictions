@@ -1,14 +1,15 @@
 from sklearn import preprocessing
 from fastai.tabular import *
 from fastai.tabular.all import *
+from sklearn.linear_model import Lasso
 from sklearn.linear_model import LassoCV
 from sklearn.feature_selection import SelectFromModel
 from bayes_opt import BayesianOptimization
 
-def select_features(df_z_scaled, excluded=[],cat_features=[]):
+def select_features(df_z_scaled, excluded=[],cat_features=[], threshold=0.8):
     '''For feature selection. Returns an array of features to be used in the model, selected using the LASSO method.
     Takes as arguments a normalized data frame. Rejects features listed under excluded and takes as categorical
-    those listed in cat_features'''
+    those listed in cat_features. Rejection of correlated features occurs at the given threshold.'''
 
     
     cont_features = [c for c in df.columns.to_list() if c not in cat_features and c not in excluded]
@@ -34,7 +35,7 @@ def select_features(df_z_scaled, excluded=[],cat_features=[]):
 
         for i, row in enumerate(filter_data):
             for j, data in enumerate(row):
-                if abs(data) > 0.85 and i != j and i != margin_idx and j != margin_idx:
+                if abs(data) > threshold and i != j and i != margin_idx and j != margin_idx:
                     correlated_points[(i,j)] = abs(filter_data[i][margin_idx])
 
         i,j = min(correlated_points, key=correlated_points.get)
@@ -64,5 +65,4 @@ def select_features(df_z_scaled, excluded=[],cat_features=[]):
     coefficients = lasso_cv.coef_ 
     print("Selected Features:", selected_features) 
     print("Feature Coefficients:", coefficients) 
-  
     return selected_features

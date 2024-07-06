@@ -23,7 +23,7 @@ games_api = cfbd.GamesApi(api_config)
 stats_api = cfbd.StatsApi(api_config)
 betting_api = cfbd.BettingApi(api_config)
 
-with open('updatedCFBModel.dat','rb') as f:
+with open('neural_net_for_spread_cfb.dat','rb') as f:
     learn = pickle.load(f)
   
 games = gather_game_data(configuration)

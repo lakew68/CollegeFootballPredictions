@@ -13,7 +13,7 @@ import math
 
 # Configure API key authorization: ApiKeyAuth
 configuration = cfbd.Configuration()
-configuration.api_key['Authorization'] = 'sHk3NJjDo7wh0ssBpflv5pxe8+A/DtHQ7pXFwQ2ffeOXjQQnfk1YQNBoeP73ZtUU' # Redacted
+configuration.api_key['Authorization'] = '' # Redacted
 configuration.api_key_prefix['Authorization'] = 'Bearer'
 api_config = cfbd.ApiClient(configuration)
 headers = {'Authorization': configuration.api_key_prefix['Authorization'] + ' ' + configuration.api_key['Authorization']} 

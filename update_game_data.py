@@ -102,6 +102,17 @@ def gather_game_data(configuration):
 def gather_new_game_data(configuration):
     '''Takes in the configuration for the cfb data api and returns statistics organized by college football game for use
     in predictions.'''
+    
+    api_config = cfbd.ApiClient(configuration)
+    headers = {'Authorization': configuration.api_key_prefix['Authorization'] + ' ' + configuration.api_key['Authorization']} 
+
+    # Some useful shortcuts
+    teams_api = cfbd.TeamsApi(api_config)
+    ratings_api = cfbd.RatingsApi(api_config)
+    games_api = cfbd.GamesApi(api_config)
+    stats_api = cfbd.StatsApi(api_config)
+    betting_api = cfbd.BettingApi(api_config)
+
 
     if os.path.isfile('CFBGameData.dat'):
         with open("CFBGameData.dat",'rb') as f:
@@ -158,7 +169,6 @@ def gather_new_game_data(configuration):
             if len(game_line) > 0 and game_line[0].spread is not None:
                 game['spread'] = float(game_line[0].spread)
 
-    headers = {'Authorization': configuration.api_key_prefix['Authorization'] + ' ' + configuration.api_key['Authorization']} 
     games2 = process_games(games2, headers)
 
     max_year_in_games2 = max([games2[i]['year'] for i in range(len(games2))])

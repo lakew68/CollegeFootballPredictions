@@ -18,7 +18,7 @@ This project aims to predict college football game results during conference pla
 
 ## Usage
 
-    Making Predictions: Run make_predictions.py to generate predictions for the upcoming week's games. The script will output the predicted spreads and the deviation from the actual spreads. This uses live dates so works after week 3 of a season. 
+Making Predictions: Run make_predictions.py to generate predictions for the upcoming week's games. The script will output the predicted spreads and the deviation from the actual spreads. This uses live dates so works after week 3 of a season. 
 
 
 

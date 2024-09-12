@@ -34,7 +34,13 @@ def gather_game_data(configuration):
 
     lines = []
     games = []
-    for year in range(max_year_in_cache, current_year):
+
+    if current_year != max_year_in_cache:
+        add = 1
+    else:
+        add = 0
+
+    for year in range(max_year_in_cache, current_year + add):
         print('Gathering games from ', year)
         response = games_api.get_games(year=year)
         games = [*games, *response]

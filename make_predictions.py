@@ -36,7 +36,7 @@ with open("cfb_feature_normalizations.dat",'rb') as f:
 
 games_to_predict = gather_new_game_data(configuration)
 
-df_pred = pd.DataFrame.from_records(games_to_predict).dropna()
+df_pred = pd.DataFrame.from_records(games_to_predict)
 
 df_pred_z_scaled = df_pred.copy()
 excluded = ['gid','year','home_team','away_team', 'home_points','margin', 'away_points','home_wins','home_interceptions','away_interceptions','home_interceptionYards','away_interceptionYards','home_fumblesLost','away_fumblesLost','home_fumblesRecovered','away_fumblesRecovered','home_interceptions_lastSeason','away_interceptions_lastSeason','home_interceptionYards_lastSeason','away_interceptionYards_lastSeason','home_fumblesLost_lastSeason','away_fumblesLost_lastSeason','home_fumblesRecovered_lastSeason','away_fumblesRecovered_lastSeason','home_interceptions_lastThree','away_interceptions_lastThree','home_interceptionYards_lastThree','away_interceptionYards_lastThree','home_fumblesLost_lastThree','away_fumblesLost_lastThree','home_fumblesRecovered_lastThree','away_fumblesRecovered_lastThree']
